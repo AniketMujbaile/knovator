@@ -91,27 +91,39 @@ const deletePost = async (req, res) => {
   }
 };
 
-// Get posts based on latitude and longitude
+// Get posts by location (latitude and longitude)
 const getPostsByLocation = async (req, res) => {
     try {
-        console.log('Request Body:', req.query);
-      const { latitude, longitude } = req.query;
-
-      if (!latitude || !longitude) {
-        return res.status(400).json({ error: 'Latitude and longitude are required' });
-      }
-  
-      // Assuming a radius of 1 degree for simplicity. You can customize the radius based on your needs.
-      const radius = 1;
+      const { latitude, longitude } = req.params;
   
       const posts = await Post.find({
-        'geoLocation.latitude': { $gte: latitude - radius, $lte: latitude + radius },
-        'geoLocation.longitude': { $gte: longitude - radius, $lte: longitude + radius },
+        geoLocation: {
+          $near: {
+            $geometry: {
+              type: 'Point',
+              coordinates: [parseFloat(longitude), parseFloat(latitude)],
+            },
+            $maxDistance: 1000, // Within 1000 meters (adjust as needed)
+          },
+        },
       });
   
-      res.json(posts);
+      res.status(200).json(posts);
     } catch (error) {
-      console.error('Error fetching posts by location:', error);
+      console.error(error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  };
+
+  // Get count of active and inactive posts
+const getPostCounts = async (req, res) => {
+    try {
+      const activeCount = await Post.countDocuments({ active: true });
+      const inactiveCount = await Post.countDocuments({ active: false });
+  
+      res.json({ activeCount, inactiveCount });
+    } catch (error) {
+      console.error('Error fetching post counts:', error);
       res.status(500).json({ error: 'Internal Server Error' });
     }
   };
@@ -123,6 +135,7 @@ module.exports = {
   updatePost,
   deletePost,
   getPostsByLocation,
-};
+  getPostCounts,
+ };
 
  

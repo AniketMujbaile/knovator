@@ -11,6 +11,8 @@ const postSchema = new mongoose.Schema({
     },
   });
   
+  postSchema.index({ geoLocation: '2dsphere' });
+
   const Post = mongoose.model('Post', postSchema);
   
   module.exports = Post;

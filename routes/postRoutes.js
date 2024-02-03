@@ -4,7 +4,6 @@ const router = express.Router();
 const postController = require('../controllers/postController');
 const authenticate = require('../middleware/authenticateToken');
 
- 
 // Create a new post
 router.post(
   '/posts',
@@ -44,7 +43,7 @@ router.delete('/posts/:postId', authenticate, postController.deletePost);
 
 // Get posts based on latitude and longitude
 router.get(
-    '/posts/location',
+    '/posts/location/:latitude/:longitude',
     authenticate,
     [
       query('latitude').isNumeric().withMessage('Latitude must be a number'),
@@ -53,27 +52,9 @@ router.get(
     postController.getPostsByLocation
   );
 
+// Get count of active and inactive posts
+router.get('/posts/count', authenticate, postController.getPostCounts);
 
 module.exports = router;
 
-// const express = require('express');
-// const router = express.Router();
-// const postController = require('../controllers/postController');
-// const authenticateToken = require('../middleware/authenticateToken');
  
-// // Create a new post
-// router.post('/posts', authenticateToken, postController.createPost);
-
-// // Get all posts for the authenticated user
-// router.get('/posts', authenticateToken, postController.getUserPosts);
-
-// // Get a specific post
-// router.get('/posts/:postId', authenticateToken, postController.getPostById);
-
-// // Update a post
-// router.put('/posts/:postId', authenticateToken, postController.updatePost);
-
-// // Delete a post
-// router.delete('/posts/:postId', authenticateToken, postController.deletePost);
-
-// module.exports = router;
